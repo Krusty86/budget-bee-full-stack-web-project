@@ -17,8 +17,10 @@ const LoginForm = () => {
     function handleLogin(e){
         e.preventDefault()
         dispatch(userLogin(credentials))
-        if(localStorage.getItem("token"!=null)){
-            // navigate("/dashboard")
+        console.log("Inside Login Check")
+        if(localStorage.getItem("token")!=null){
+            console.log("Login Success")
+            navigate("/home")
         }
     }
 

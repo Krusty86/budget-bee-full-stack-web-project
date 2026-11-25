@@ -45,6 +45,8 @@ const AuthSlice = createSlice({
     initialState: {
         userId: localStorage.getItem("userId") || null,
         userToken: localStorage.getItem("token") || null,
+        username: localStorage.getItem("username") || null,
+        fullname: localStorage.getItem("fullname") || null,
         error: null,
         loading: false,
         registerSuccess: false
@@ -54,9 +56,13 @@ const AuthSlice = createSlice({
         logout: (state) => {
             state.userId = null;
             state.userToken = null;
+            state.username = null;
+            state.fullname = null;
 
             localStorage.removeItem("userId");
             localStorage.removeItem("token");
+            localStorage.removeItem("username");
+            localStorage.removeItem("fullname");
         },
 
         resetRegisterStatus: (state) => {
@@ -67,7 +73,6 @@ const AuthSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
-
             // LOGIN
             .addCase(userLogin.pending, (state) => {
                 state.loading = true;
@@ -76,11 +81,20 @@ const AuthSlice = createSlice({
             .addCase(userLogin.fulfilled, (state, action) => {
                 state.loading = false;
 
+                const user = action.payload.user;
+
+                const username = user.userName;
+                const fullname = user.fullName;
+
                 state.userId = action.payload.userId;
                 state.userToken = action.payload.token;
+                state.username = username;
+                state.fullname = fullname;
 
                 localStorage.setItem("userId", action.payload.userId);
                 localStorage.setItem("token", action.payload.token);
+                localStorage.setItem("username", username);
+                localStorage.setItem("fullname", fullname);
             })
             .addCase(userLogin.rejected, (state, action) => {
                 state.loading = false;
