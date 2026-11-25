@@ -1,0 +1,59 @@
+.sr-donut-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sr-donut-svg {
+  width: 150px;
+  height: 150px;
+}
+
+.sr-donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.sr-donut-total {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-trend-wrap {
+  width: 100%;
+}
+
+.sr-trend-svg {
+  width: 100%;
+  height: 180px;
+}
+
+.sr-trend-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 12px 0;
+}
+
+.sr-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.sr-dot-inflow {
+  background-color: #34d399;
+}
+
+.sr-dot-outflow {
+  background-color: #fbbf24;
+}

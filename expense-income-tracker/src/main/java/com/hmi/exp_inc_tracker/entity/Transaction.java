@@ -1,0 +1,61 @@
+package com.hmi.exp_inc_tracker.entity;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hmi.exp_inc_tracker.enums.TransactionCategory;
+import com.hmi.exp_inc_tracker.enums.TransactionType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name="transactions")
+public class Transaction extends BaseEntity{
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	@Enumerated(EnumType.STRING)
+	private TransactionCategory category;
+	
+	@Enumerated(EnumType.STRING)
+	private TransactionType transaction_type;
+	@ManyToOne
+	@JoinColumn(nullable = true)
+	private FinancialAccount from_account;
+	
+	@ManyToOne
+	@JoinColumn(nullable = true)
+	private FinancialAccount to_account;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	private Subscription subscription;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonIgnore
+	private User user;
+	private BigDecimal amount;
+	private String note;
+	@Column(nullable = false)
+	private LocalDate transactionDate;
+	
+}
