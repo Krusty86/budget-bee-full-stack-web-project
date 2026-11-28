@@ -7,7 +7,7 @@ import {
   selectAccountError,
 } from "../../selectors/accountSelector";
 
-// Match values to your backend FinancialAccountType enum
+// account types from backend
 const ACCOUNT_TYPES = [
   {
     value: "CASH",
@@ -331,7 +331,7 @@ const AddAccount = () => {
             </div>
 
             {(validationError || error) && (
-              <div className="alert alert-danger mb-4" role="alert">
+              <div className="bb-pf-feedback bb-pf-feedback-error mb-4" role="alert">
                 {validationError || error}
               </div>
             )}

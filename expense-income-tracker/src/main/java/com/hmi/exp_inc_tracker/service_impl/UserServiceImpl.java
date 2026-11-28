@@ -62,4 +62,29 @@ public class UserServiceImpl implements UserService{
 		return null;
 	}
 
+	@Override
+	public User modifyUserInfo(User newUser, String email) {
+		// TODO Auto-generated method stub
+		User user = userRepository.findByEmail(email).orElse(null);
+		if(user!=null) {
+			if(!newUser.getFullName().equals(null))
+				user.setFullName(newUser.getFullName());
+			if(!newUser.getPhone().equals(null))
+				user.setPhone(newUser.getPhone());
+			return userRepository.save(user);
+		}
+		return null;
+	}
+
+	@Override
+	public Boolean checkPwd(String oldPwd, String confirmOldPwd) {
+		// TODO Auto-generated method stub
+//		String encodedPwd = pwdEncoder.encode(confirmOldPwd);
+		boolean status = pwdEncoder.matches(confirmOldPwd, oldPwd);
+		System.out.println("PasswordCheck:: "+status);
+		if(status)
+			return true;
+		return false;
+	}
+
 }

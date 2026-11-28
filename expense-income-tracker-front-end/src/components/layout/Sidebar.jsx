@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../reducers/AuthSlice";
+import '../../assets/css/sidebar.css'
+
 const SIDEBAR_STYLES = `
 :root {
   --primary-amber: #f59e0b;
@@ -450,11 +452,31 @@ const SIDEBAR_STYLES = `
 const NAV_ITEMS = [
   { id: "home", label: "Home", icon: "fa-house", href: "/home" },
   { id: "accounts", label: "Accounts", icon: "fa-wallet", href: "/accounts" },
-  { id: "records", label: "Records", icon: "fa-list-check", href: "/transactions" },
-  { id: "statistics", label: "Statistics", icon: "fa-chart-line", href: "/statistics" },
+  {
+    id: "records",
+    label: "Records",
+    icon: "fa-list-check",
+    href: "/transactions",
+  },
+  {
+    id: "statistics",
+    label: "Statistics",
+    icon: "fa-chart-line",
+    href: "/statistics",
+  },
   { id: "budgets", label: "Budgets", icon: "fa-chart-pie", href: "/budgets" },
-  { id: "shopping-lists", label: "Shopping Lists", icon: "fa-cart-shopping", href: "/shopping-lists" },
-  { id: "subscriptions", label: "Subscriptions", icon: "fa-arrows-rotate", href: "/subscriptions" },
+  {
+    id: "shopping-lists",
+    label: "Shopping Lists",
+    icon: "fa-cart-shopping",
+    href: "/shopping-lists",
+  },
+  {
+    id: "subscriptions",
+    label: "Subscriptions",
+    icon: "fa-arrows-rotate",
+    href: "/subscriptions",
+  },
 ];
 
 const FOOTER_ITEMS = [
@@ -473,7 +495,7 @@ export default function SideBar({
   user = {
     name: "Bee",
     handle: "@budget_bee",
-    avatarSrc: "/img/BudgetBee_Logo.png",
+    avatarSrc: "/img/BudgetBee_profile.jpg",
     logoSrc: "/img/BudgetBee_Logo.png",
   },
 }) {
@@ -497,13 +519,16 @@ export default function SideBar({
   const matchedItem = [...NAV_ITEMS, ...FOOTER_ITEMS].find(
     (item) =>
       location.pathname === item.href ||
-      location.pathname.startsWith(`${item.href}/`)
+      location.pathname.startsWith(`${item.href}/`),
   );
 
   const currentActive =
     matchedItem?.id ||
     (location.pathname.startsWith("/add-account")
       ? "accounts"
+      : activeSection || "home") ||
+    (location.pathname.startsWith("/add-subscription")
+      ? "subscriptions"
       : activeSection || "home");
 
   const handleNavClick = (e, item) => {
@@ -515,15 +540,15 @@ export default function SideBar({
   };
 
   const dispatch = useDispatch();
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const handleLogoutClick = (e) => {
-  e.preventDefault();
-  setIsDrawerOpen(false);
-  dispatch(logout());
-  onLogout?.();
-  navigate("/login", { replace: true });
-};
+  const handleLogoutClick = (e) => {
+    e.preventDefault();
+    setIsDrawerOpen(false);
+    dispatch(logout());
+    onLogout?.();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <>
@@ -549,7 +574,9 @@ const handleLogoutClick = (e) => {
       )}
 
       {/* Main Sidebar Container */}
-      <aside className={`sidebar-container ${isDrawerOpen ? "drawer-open" : ""}`}>
+      <aside
+        className={`sidebar-container ${isDrawerOpen ? "drawer-open" : ""}`}
+      >
         <div className="sidebar-glow-orb"></div>
 
         {/* 1. App Logo Section */}
@@ -603,7 +630,10 @@ const handleLogoutClick = (e) => {
                   onClick={(e) => handleNavClick(e, item)}
                 >
                   <span className="nav-icon-wrap">
-                    <i className={`fa-solid ${item.icon} nav-icon`} aria-hidden="true"></i>
+                    <i
+                      className={`fa-solid ${item.icon} nav-icon`}
+                      aria-hidden="true"
+                    ></i>
                   </span>
                   <span className="nav-text">{item.label}</span>
                 </Link>
@@ -626,7 +656,10 @@ const handleLogoutClick = (e) => {
                   onClick={(e) => handleNavClick(e, item)}
                 >
                   <span className="nav-icon-wrap">
-                    <i className={`fa-solid ${item.icon} nav-icon`} aria-hidden="true"></i>
+                    <i
+                      className={`fa-solid ${item.icon} nav-icon`}
+                      aria-hidden="true"
+                    ></i>
                   </span>
                   <span className="nav-text">{item.label}</span>
                 </Link>
@@ -639,7 +672,10 @@ const handleLogoutClick = (e) => {
               onClick={handleLogoutClick}
             >
               <span className="nav-icon-wrap">
-                <i className="fa-solid fa-right-from-bracket nav-icon" aria-hidden="true"></i>
+                <i
+                  className="fa-solid fa-right-from-bracket nav-icon"
+                  aria-hidden="true"
+                ></i>
               </span>
               <span className="nav-text">Logout</span>
             </Link>

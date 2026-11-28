@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -33,29 +32,17 @@ const getTrend = (current, previous) => {
 const FirstRow = () => {
   const dispatch = useDispatch();
 
-  const transactions = useSelector(
-    (state) => state.transactions.items || []
-  );
+  const transactions = useSelector((state) => state.transactions.items || []);
 
-  const budgets = useSelector(
-    (state) => state.budgets.items || []
-  );
+  const budgets = useSelector((state) => state.budgets.items || []);
 
-  const transactionLoading = useSelector(
-    (state) => state.transactions.loading
-  );
+  const transactionLoading = useSelector((state) => state.transactions.loading);
 
-  const budgetLoading = useSelector(
-    (state) => state.budgets.loading
-  );
+  const budgetLoading = useSelector((state) => state.budgets.loading);
 
-  const transactionError = useSelector(
-    (state) => state.transactions.error
-  );
+  const transactionError = useSelector((state) => state.transactions.error);
 
-  const budgetError = useSelector(
-    (state) => state.budgets.error
-  );
+  const budgetError = useSelector((state) => state.budgets.error);
 
   useEffect(() => {
     dispatch(fetchTransactions());
@@ -65,50 +52,30 @@ const FirstRow = () => {
   const dashboard = useMemo(() => {
     const today = new Date();
 
-    const monthStart = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      1
-    );
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    const monthEnd = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0
-    );
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
     const previousMonthStart = new Date(
       today.getFullYear(),
       today.getMonth() - 1,
-      1
+      1,
     );
 
-    const previousMonthEnd = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      0
-    );
+    const previousMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
 
     // Current month transactions
     const currentTransactions = transactions.filter((transaction) => {
       const date = getTransactionDate(transaction);
 
-      return (
-        date &&
-        date >= monthStart &&
-        date <= monthEnd
-      );
+      return date && date >= monthStart && date <= monthEnd;
     });
 
     // Previous month transactions
     const previousTransactions = transactions.filter((transaction) => {
       const date = getTransactionDate(transaction);
 
-      return (
-        date &&
-        date >= previousMonthStart &&
-        date <= previousMonthEnd
-      );
+      return date && date >= previousMonthStart && date <= previousMonthEnd;
     });
 
     const calculateTotals = (items) =>
@@ -130,7 +97,7 @@ const FirstRow = () => {
           // Transfers are excluded from income and expenses.
           return result;
         },
-        { income: 0, expense: 0 }
+        { income: 0, expense: 0 },
       );
 
     const currentTotals = calculateTotals(currentTransactions);
@@ -151,7 +118,7 @@ const FirstRow = () => {
 
     const monthlyBudget = currentMonthlyBudgets.reduce(
       (total, budget) => total + Number(budget.target || 0),
-      0
+      0,
     );
 
     return {
@@ -159,15 +126,9 @@ const FirstRow = () => {
       expense: currentTotals.expense,
       budget: monthlyBudget,
 
-      incomeTrend: getTrend(
-        currentTotals.income,
-        previousTotals.income
-      ),
+      incomeTrend: getTrend(currentTotals.income, previousTotals.income),
 
-      expenseTrend: getTrend(
-        currentTotals.expense,
-        previousTotals.expense
-      ),
+      expenseTrend: getTrend(currentTotals.expense, previousTotals.expense),
 
       budgetCount: currentMonthlyBudgets.length,
     };
@@ -185,7 +146,7 @@ const FirstRow = () => {
 
   if (error && transactions.length === 0 && budgets.length === 0) {
     return (
-      <div className="alert alert-danger">
+      <div className="bb-pf-feedback bb-pf-feedback-error">
         Failed to load dashboard data.
         <button
           className="btn btn-sm btn-outline-danger ms-3"
@@ -203,7 +164,6 @@ const FirstRow = () => {
   return (
     <div className="container-fluid px-0 fr-wrap">
       <div className="row g-3 g-xl-4">
-
         {/* 1. Total Income */}
         <div className="col-12 col-md-4">
           <div className="fr-box fr-box-income">
@@ -212,8 +172,14 @@ const FirstRow = () => {
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div className="d-flex align-items-center gap-2">
                 <span className="fr-badge-icon fr-bi-income">
-                  <svg width="17" height="17" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="2.3">
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.3"
+                  >
                     <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                     <polyline points="16 7 22 7 22 13" />
                   </svg>
@@ -228,29 +194,34 @@ const FirstRow = () => {
 
             <div className="d-flex justify-content-between align-items-end gap-2 mt-3">
               <div className="min-w-0">
-                <div className="fr-value">
-                  {formatMMK(dashboard.income)}
-                </div>
+                <div className="fr-value">{formatMMK(dashboard.income)}</div>
 
                 <div className="d-flex align-items-center gap-2 mt-2 flex-wrap">
-                  <span className={`fr-trend ${
-                    dashboard.incomeTrend === null
-                      ? ""
-                      : dashboard.incomeTrend >= 0
-                        ? "fr-trend-up"
-                        : "fr-trend-down"
-                  }`}>
+                  <span
+                    className={`fr-trend ${
+                      dashboard.incomeTrend === null
+                        ? ""
+                        : dashboard.incomeTrend >= 0
+                          ? "fr-trend-up"
+                          : "fr-trend-down"
+                    }`}
+                  >
                     {dashboard.incomeTrend === null
                       ? "—"
-                      : dashboard.incomeTrend >= 0 ? "↑" : "↓"}{" "}
+                      : dashboard.incomeTrend >= 0
+                        ? "↑"
+                        : "↓"}{" "}
                     {formatTrend(dashboard.incomeTrend)}
                   </span>
                   <span className="fr-caption">from last month</span>
                 </div>
               </div>
 
-              <svg viewBox="0 0 96 42"
-                className="fr-chart fr-chart-income" aria-hidden="true">
+              <svg
+                viewBox="0 0 96 42"
+                className="fr-chart fr-chart-income"
+                aria-hidden="true"
+              >
                 <defs>
                   <linearGradient id="frGradIncome" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
@@ -282,8 +253,14 @@ const FirstRow = () => {
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div className="d-flex align-items-center gap-2">
                 <span className="fr-badge-icon fr-bi-expense">
-                  <svg width="17" height="17" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="2.3">
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.3"
+                  >
                     <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
                     <polyline points="16 17 22 17 22 11" />
                   </svg>
@@ -298,31 +275,42 @@ const FirstRow = () => {
 
             <div className="d-flex justify-content-between align-items-end gap-2 mt-3">
               <div className="min-w-0">
-                <div className="fr-value">
-                  {formatMMK(dashboard.expense)}
-                </div>
+                <div className="fr-value">{formatMMK(dashboard.expense)}</div>
 
                 <div className="d-flex align-items-center gap-2 mt-2 flex-wrap">
-                  <span className={`fr-trend ${
-                    dashboard.expenseTrend === null
-                      ? ""
-                      : dashboard.expenseTrend <= 0
-                        ? "fr-trend-up"
-                        : "fr-trend-down"
-                  }`}>
+                  <span
+                    className={`fr-trend ${
+                      dashboard.expenseTrend === null
+                        ? ""
+                        : dashboard.expenseTrend <= 0
+                          ? "fr-trend-up"
+                          : "fr-trend-down"
+                    }`}
+                  >
                     {dashboard.expenseTrend === null
                       ? "—"
-                      : dashboard.expenseTrend >= 0 ? "↑" : "↓"}{" "}
+                      : dashboard.expenseTrend >= 0
+                        ? "↑"
+                        : "↓"}{" "}
                     {formatTrend(dashboard.expenseTrend)}
                   </span>
                   <span className="fr-caption">from last month</span>
                 </div>
               </div>
 
-              <svg viewBox="0 0 96 42"
-                className="fr-chart fr-chart-expense" aria-hidden="true">
+              <svg
+                viewBox="0 0 96 42"
+                className="fr-chart fr-chart-expense"
+                aria-hidden="true"
+              >
                 <defs>
-                  <linearGradient id="frGradExpense" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id="frGradExpense"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop offset="0%" stopColor="#ef4444" stopOpacity="0.32" />
                     <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
                   </linearGradient>
@@ -352,8 +340,14 @@ const FirstRow = () => {
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div className="d-flex align-items-center gap-2">
                 <span className="fr-badge-icon fr-bi-budget">
-                  <svg width="17" height="17" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="2.3">
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.3"
+                  >
                     <rect x="2" y="5" width="20" height="14" rx="3" />
                     <line x1="2" y1="10" x2="22" y2="10" />
                   </svg>
@@ -380,8 +374,11 @@ const FirstRow = () => {
                 </div>
               </div>
 
-              <svg viewBox="0 0 96 42"
-                className="fr-chart fr-chart-budget" aria-hidden="true">
+              <svg
+                viewBox="0 0 96 42"
+                className="fr-chart fr-chart-budget"
+                aria-hidden="true"
+              >
                 <defs>
                   <linearGradient id="frGradBudget" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.38" />
@@ -404,7 +401,6 @@ const FirstRow = () => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

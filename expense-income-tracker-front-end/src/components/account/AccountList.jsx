@@ -63,7 +63,7 @@ const AccountList = () => {
 
       {/* Error Alert */}
       {error && (
-        <div className="alert alert-danger mb-4" role="alert">
+        <div className="bb-pf-feedback bb-pf-feedback-error mb-4" role="alert">
           {error}
         </div>
       )}

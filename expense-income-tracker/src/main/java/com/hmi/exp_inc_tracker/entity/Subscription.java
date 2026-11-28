@@ -36,7 +36,6 @@ public class Subscription extends BaseEntity{
 	@JsonIgnore
 	private	User user;
 	@ManyToOne
-	@JsonIgnore
 	private FinancialAccount account;
 	private String name;
 	private BigDecimal amount;

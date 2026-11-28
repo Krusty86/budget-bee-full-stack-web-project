@@ -9,4 +9,6 @@ public interface UserService {
 	User register(RegisterRequest register);
 	User getUserByEmail(String email);
 	User resetPassword(User user, String pwd);
+	User modifyUserInfo(User newUser, String email);
+	Boolean checkPwd(String oldPwd, String confirmOldPwd);
 }

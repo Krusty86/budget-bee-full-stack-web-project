@@ -5,6 +5,7 @@ import budgetReducer from "../reducers/BudgetSlice";
 import transactionReducer from "../reducers/TransactionSlice";
 import taskListReducer from "../reducers/TaskListSlice";
 import subscriptionReducer from "../reducers/SubscriptionSlice";
+import userReducer from "../reducers/UserSlice";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     transactions: transactionReducer,
     taskLists: taskListReducer,
     subscriptions: subscriptionReducer,
+    user:userReducer,
   },
 });
 

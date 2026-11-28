@@ -44,9 +44,12 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService{
 
 	@Override
 	public Boolean verifyOtp(String email, String code) {
+		System.out.println("Email :"+email+"/nCode: "+code);
 		PasswordResetToken token = passwordResetTokenRepository
 				.findFirstByEmailAndUsedFalseOrderByIdDesc(email);
+		System.out.println(token);
 		if(token!=null) {
+			System.out.println("Inside Verfiy OTP Token valid case");
 			if(token.getOtp().equals(code) && token.getExpiredAt().isAfter(LocalDateTime.now())) {
 				token.setUsed(true);
 				passwordResetTokenRepository.save(token);
