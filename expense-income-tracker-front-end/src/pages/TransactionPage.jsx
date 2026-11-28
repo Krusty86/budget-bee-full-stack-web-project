@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTransactions, addTransaction } from "../reducers/TransactionSlice";
+import {
+  fetchTransactions,
+  addTransaction,
+} from "../reducers/TransactionSlice";
 import { fetchAccounts } from "../reducers/AccountSlice";
 import AddTransaction from "../components/transaction/AddTransaction";
 import TransactionList from "../components/transaction/TransactionList";
@@ -39,7 +42,7 @@ const TransactionPage = () => {
       totalOutflow,
       transfer,
       totalMovement: income + totalOutflow + transfer,
-      recordCount: transactions.length
+      recordCount: transactions.length,
     };
   }, [transactions]);
 
@@ -49,12 +52,13 @@ const TransactionPage = () => {
       setIsAddOpen(false);
       dispatch(fetchTransactions());
     } catch (error) {
-      // Redux stores the request error and the form remains open for correction.
+      
     }
   };
 
   return (
-    <main className="container-fluid bb-tx-wrap">
+    <div className="container-fluid bb-tx-wrap">
+      
       <section className="bb-tx-hero mb-4">
         <div className="bb-tx-heading">
           <span className="bb-tx-eyebrow">BUDGETBEE / FINANCE OVERVIEW</span>
@@ -91,7 +95,10 @@ const TransactionPage = () => {
         transactionLoading={transactionLoading}
       />
 
-      <section className="row g-3 bb-tx-kpi-row mb-4" aria-label="Transaction summary">
+      <section
+        className="row g-3 bb-tx-kpi-row mb-4"
+        aria-label="Transaction summary"
+      >
         <div className="col-12 col-md-6 col-xl-4">
           <article className="bb-kpi-box bb-kpi-gold-card">
             <div className="bb-kpi-topline bb-kpi-topline-gold" />
@@ -100,7 +107,9 @@ const TransactionPage = () => {
               <span className="bb-meta-tag">Total Transaction</span>
               <span className="bb-kpi-chip">MMK</span>
             </div>
-            <div className="bb-kpi-num bb-kpi-num-gold">{formatMMK(totals.totalMovement)}</div>
+            <div className="bb-kpi-num bb-kpi-num-gold">
+              {formatMMK(totals.totalMovement)}
+            </div>
             <p className="bb-kpi-foot mb-0">
               Includes income, outflow and transfers
             </p>
@@ -115,8 +124,12 @@ const TransactionPage = () => {
               <span className="bb-meta-tag">Total Income</span>
               <span className="bb-kpi-chip bb-kpi-chip-income">INCOME</span>
             </div>
-            <div className="bb-kpi-num bb-amt-in">+{formatMMK(totals.income)}</div>
-            <p className="bb-kpi-foot mb-0">Money received into your accounts</p>
+            <div className="bb-kpi-num bb-amt-in">
+              +{formatMMK(totals.income)}
+            </div>
+            <p className="bb-kpi-foot mb-0">
+              Money received into your accounts
+            </p>
           </article>
         </div>
 
@@ -128,15 +141,19 @@ const TransactionPage = () => {
               <span className="bb-meta-tag">Total Expenses</span>
               <span className="bb-kpi-chip bb-kpi-chip-expense">OUTFLOW</span>
             </div>
-            <div className="bb-kpi-num bb-amt-out">-{formatMMK(totals.totalOutflow)}</div>
+            <div className="bb-kpi-num bb-amt-out">
+              -{formatMMK(totals.totalOutflow)}
+            </div>
             <p className="bb-kpi-foot mb-0">Expenses and subscriptions</p>
           </article>
         </div>
       </section>
 
       {transactionError && (
-        <div className="alert alert-danger" role="alert">
-          {typeof transactionError === "string" ? transactionError : "Unable to load transactions."}
+        <div className="bb-pf-feedback bb-pf-feedback-error" role="alert">
+          {typeof transactionError === "string"
+            ? transactionError
+            : "Unable to load transactions."}
         </div>
       )}
       {transactionLoading && transactions.length === 0 ? (
@@ -144,7 +161,7 @@ const TransactionPage = () => {
       ) : (
         <TransactionList transactions={transactions} />
       )}
-    </main>
+    </div>
   );
 };
 

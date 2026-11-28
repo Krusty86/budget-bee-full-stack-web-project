@@ -1,4 +1,3 @@
-import '../assets/css/defaultpage.css'
 const DefaultPage = () => {
   return (
     <>
@@ -475,7 +474,6 @@ body {
       `}</style>
 
       <div className="bb-lux-body d-flex flex-column">
-
         {/* Navbar */}
         <nav
           id="bbLuxNavbar"
@@ -524,7 +522,6 @@ body {
         <main className="flex-grow-1 d-flex align-items-center">
           <section className="container-fluid px-4 px-xl-5 bb-lux-hero">
             <div className="row align-items-center g-4 g-lg-5">
-
               {/* Left Hero Copy */}
               <div className="col-lg-5 bb-lux-enter">
                 <span className="bb-lux-badge d-inline-block px-3 py-1 mb-3">
@@ -533,13 +530,13 @@ body {
 
                 <h1 className="bb-lux-headline fw-extrabold mb-3">
                   Master Your Cashflow With
-                  <span className="bb-lux-gold-text d-block">
-                    BudgetBee
-                  </span>
+                  <span className="bb-lux-gold-text d-block">BudgetBee</span>
                 </h1>
 
                 <p className="bb-lux-subcopy mb-4">
-                  Precision budgeting, real-time cashflow analytics, and multi-account clarity crafted in a dark gold ledger experience.
+                  Precision budgeting, real-time cashflow analytics, and
+                  multi-account clarity crafted in a dark gold ledger
+                  experience.
                 </p>
 
                 <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
@@ -571,7 +568,7 @@ body {
                     className="badge rounded-pill px-3 py-2 fw-bold"
                     style={{
                       background: "rgba(15, 23, 42, 0.92)",
-                      color: "#fbbf24"
+                      color: "#fbbf24",
                     }}
                   >
                     DARK GOLD UI
@@ -593,7 +590,7 @@ body {
                             width: "9px",
                             height: "9px",
                             background: "#34d399",
-                            boxShadow: "0 0 8px rgba(52, 211, 153, 0.7)"
+                            boxShadow: "0 0 8px rgba(52, 211, 153, 0.7)",
                           }}
                         ></span>
 
@@ -620,7 +617,6 @@ body {
 
                     <div className="bb-lux-metric-strip px-3 px-sm-4 py-3">
                       <div className="row g-2 text-start">
-
                         <div className="col-4">
                           <div className="bb-lux-metric-pill px-3 py-2">
                             <div
@@ -674,7 +670,6 @@ body {
                             </div>
                           </div>
                         </div>
-
                       </div>
                     </div>
                   </div>
@@ -711,10 +706,8 @@ body {
                       Start Now
                     </a>
                   </div>
-
                 </div>
               </div>
-
             </div>
           </section>
         </main>
@@ -723,13 +716,13 @@ body {
         <footer id="bbLuxFooter" className="bb-lux-footer py-3">
           <div className="container d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 small">
             <span>
-              © 2026 <strong className="text-white">BudgetBee</strong>. All rights reserved.
+              © 2026 <strong className="text-white">BudgetBee</strong>. All
+              rights reserved.
             </span>
 
             <span>Crafted with Dark Gold Precision</span>
           </div>
         </footer>
-
       </div>
     </>
   );

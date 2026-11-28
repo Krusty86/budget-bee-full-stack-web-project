@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+const TX_PAGE_SIZE = 8;
 
 const CAT_META = {
   FOOD: { label: "Food", color: "#fbbf24" },
@@ -8,10 +10,17 @@ const CAT_META = {
   HOUSING: { label: "Housing", color: "#f59e0b" },
   BILLPAYMENT: { label: "Bill Payment", color: "#fde68a" },
   ENTERTAINMENT: { label: "Entertainment", color: "#fb923c" },
-  OTHER: { label: "Other", color: "#94a3b8" }
+  OTHER: { label: "Other", color: "#94a3b8" },
 };
 
-const RING_COLORS = ["#fbbf24", "#f59e0b", "#34d399", "#38bdf8", "#fb923c", "#fde68a"];
+const RING_COLORS = [
+  "#fbbf24",
+  "#f59e0b",
+  "#34d399",
+  "#38bdf8",
+  "#fb923c",
+  "#fde68a",
+];
 const FILTER_TYPES = ["ALL", "INCOME", "EXPENSE", "TRANSFER", "SUBSCRIPTION"];
 
 const formatMMK = (value) => `${Number(value || 0).toLocaleString()} MMK`;
@@ -28,7 +37,7 @@ const getTypeLabel = (type) => {
     INCOME: "Income",
     EXPENSE: "Expense",
     TRANSFER: "Transfer",
-    SUBSCRIPTION: "Subscription"
+    SUBSCRIPTION: "Subscription",
   };
   return labels[type] || "Transaction";
 };
@@ -46,6 +55,7 @@ const TransactionList = ({ transactions = [] }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [page, setPage] = useState(1);
 
   const items = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -53,37 +63,69 @@ const TransactionList = ({ transactions = [] }) => {
     return [...transactions]
       .filter((tx) => {
         const categoryLabel = CAT_META[tx.category]?.label || tx.category || "";
-        const matchesType = typeFilter === "ALL" || tx.transaction_type === typeFilter;
-        const matchesCategory = catFilter === "ALL" || tx.category === catFilter;
+        const matchesType =
+          typeFilter === "ALL" || tx.transaction_type === typeFilter;
+        const matchesCategory =
+          catFilter === "ALL" || tx.category === catFilter;
         const searchable = [
           categoryLabel,
           tx.note,
           tx.from_account?.accname || tx.from_account?.name,
           tx.to_account?.accname || tx.to_account?.name,
           tx.transaction_type,
-          tx.transactionDate || tx.createdDate
-        ].filter(Boolean).join(" ").toLowerCase();
+          tx.transactionDate || tx.createdDate,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
 
-        return matchesType && matchesCategory && (!query || searchable.includes(query));
+        return (
+          matchesType &&
+          matchesCategory &&
+          (!query || searchable.includes(query))
+        );
       })
       .sort((a, b) => {
-        const dateA = new Date(`${a.transactionDate || a.createdDate || ""} ${a.createdTime || ""}`).getTime();
-        const dateB = new Date(`${b.transactionDate || b.createdDate || ""} ${b.createdTime || ""}`).getTime();
-        if (Number.isFinite(dateA) && Number.isFinite(dateB) && dateA !== dateB) return dateB - dateA;
+        const dateA = new Date(
+          `${a.transactionDate || a.createdDate || ""} ${a.createdTime || ""}`,
+        ).getTime();
+        const dateB = new Date(
+          `${b.transactionDate || b.createdDate || ""} ${b.createdTime || ""}`,
+        ).getTime();
+        if (Number.isFinite(dateA) && Number.isFinite(dateB) && dateA !== dateB)
+          return dateB - dateA;
         return Number(b.id || 0) - Number(a.id || 0);
       });
   }, [transactions, search, typeFilter, catFilter]);
 
+  const totalPages = Math.max(1, Math.ceil(items.length / TX_PAGE_SIZE));
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, typeFilter, catFilter, transactions.length]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (page - 1) * TX_PAGE_SIZE;
+    return items.slice(start, start + TX_PAGE_SIZE);
+  }, [items, page]);
+
   const breakdown = useMemo(() => {
     const outflows = transactions.filter(
-      (tx) => tx.transaction_type === "EXPENSE" || tx.transaction_type === "SUBSCRIPTION"
+      (tx) =>
+        tx.transaction_type === "EXPENSE" ||
+        tx.transaction_type === "SUBSCRIPTION",
     );
     const total = outflows.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
     const totalsByCategory = {};
 
     outflows.forEach((tx) => {
       const key = tx.category || "OTHER";
-      totalsByCategory[key] = (totalsByCategory[key] || 0) + Number(tx.amount || 0);
+      totalsByCategory[key] =
+        (totalsByCategory[key] || 0) + Number(tx.amount || 0);
     });
 
     const entries = Object.entries(totalsByCategory)
@@ -93,7 +135,7 @@ const TransactionList = ({ transactions = [] }) => {
         label: CAT_META[category]?.label || category,
         color: RING_COLORS[index % RING_COLORS.length],
         amount,
-        percent: total > 0 ? Math.round((amount / total) * 100) : 0
+        percent: total > 0 ? Math.round((amount / total) * 100) : 0,
       }));
 
     let cursor = 0;
@@ -108,13 +150,13 @@ const TransactionList = ({ transactions = [] }) => {
       entries,
       conicGradient: entries.length
         ? `conic-gradient(${gradientParts.join(", ")}, rgba(255,255,255,.08) ${cursor}% 100%)`
-        : "conic-gradient(rgba(255,255,255,.08) 0% 100%)"
+        : "conic-gradient(rgba(255,255,255,.08) 0% 100%)",
     };
   }, [transactions]);
 
   const subscriptions = useMemo(
     () => transactions.filter((tx) => tx.transaction_type === "SUBSCRIPTION"),
-    [transactions]
+    [transactions],
   );
 
   const activeEntry =
@@ -132,10 +174,13 @@ const TransactionList = ({ transactions = [] }) => {
     const amount = getAmountPresentation(tx.transaction_type);
     return (
       <span className={amount.className}>
-        {amount.prefix}{formatMMK(tx.amount)}
+        {amount.prefix}
+        {formatMMK(tx.amount)}
       </span>
     );
   };
+
+  const startIdx = (page - 1) * TX_PAGE_SIZE;
 
   return (
     <>
@@ -155,7 +200,9 @@ const TransactionList = ({ transactions = [] }) => {
 
             <div className="bb-ledger-toolbar">
               <div className="bb-search-wrap">
-                <span className="bb-search-icon" aria-hidden="true">⌕</span>
+                <span className="bb-search-icon" aria-hidden="true">
+                  ⌕
+                </span>
                 <input
                   type="search"
                   value={search}
@@ -208,7 +255,10 @@ const TransactionList = ({ transactions = [] }) => {
                 </div>
 
                 <div className="bb-filter-group bb-category-filter">
-                  <label className="bb-filter-label" htmlFor="bb-category-filter">
+                  <label
+                    className="bb-filter-label"
+                    htmlFor="bb-category-filter"
+                  >
                     Category
                   </label>
                   <select
@@ -219,12 +269,18 @@ const TransactionList = ({ transactions = [] }) => {
                   >
                     <option value="ALL">All categories</option>
                     {Object.entries(CAT_META).map(([key, value]) => (
-                      <option key={key} value={key}>{value.label}</option>
+                      <option key={key} value={key}>
+                        {value.label}
+                      </option>
                     ))}
                   </select>
                 </div>
 
-                <button type="button" className="bb-clear-filters" onClick={clearFilters}>
+                <button
+                  type="button"
+                  className="bb-clear-filters"
+                  onClick={clearFilters}
+                >
                   Reset filters
                 </button>
               </div>
@@ -243,105 +299,183 @@ const TransactionList = ({ transactions = [] }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.length === 0 ? (
+                  {paginatedItems.length === 0 ? (
                     <tr>
                       <td colSpan="5">
                         <div className="bb-empty-state">
                           <span className="bb-empty-icon">⌕</span>
                           <strong>No transactions found</strong>
                           <span>Try changing your search or filters.</span>
-                          <button type="button" className="bb-clear-filters" onClick={clearFilters}>
+                          <button
+                            type="button"
+                            className="bb-clear-filters"
+                            onClick={clearFilters}
+                          >
                             Clear all filters
                           </button>
                         </div>
                       </td>
                     </tr>
-                  ) : items.map((tx) => {
-                    const category = CAT_META[tx.category] || CAT_META.OTHER;
-                    return (
-                      <tr key={tx.id}>
-                        <td>
-                          <div className="bb-transaction-cell">
-                            <span className="bb-transaction-category-icon" style={{ "--category-color": category.color }}>
-                              {category.label.charAt(0)}
-                            </span>
-                            <div className="bb-transaction-copy">
-                              <strong>{tx.note || category.label}</strong>
-                              <span>{category.label} <i>·</i> {getTypeLabel(tx.transaction_type)}</span>
+                  ) : (
+                    paginatedItems.map((tx) => {
+                      const category = CAT_META[tx.category] || CAT_META.OTHER;
+                      return (
+                        <tr key={tx.id}>
+                          <td>
+                            <div className="bb-transaction-cell">
+                              <span
+                                className="bb-transaction-category-icon"
+                                style={{ "--category-color": category.color }}
+                              >
+                                {category.label.charAt(0)}
+                              </span>
+                              <div className="bb-transaction-copy">
+                                <strong>{tx.note || category.label}</strong>
+                                <span>
+                                  {category.label} <i>·</i>{" "}
+                                  {getTypeLabel(tx.transaction_type)}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="bb-acct-text">{getAccountSummary(tx.from_account, tx.to_account)}</span>
-                        </td>
-                        <td>
-                          <div className="bb-date-cell">
-                            <strong>{tx.transactionDate || tx.createdDate || "—"}</strong>
-                            <span>{tx.createdTime || ""}</span>
-                          </div>
-                        </td>
-                        <td className="text-end">{renderAmount(tx)}</td>
-                        <td className="text-center">
-                          <button
-                            type="button"
-                            className="bb-action-btn"
-                            title="View transaction details"
-                            aria-label={`View details for ${tx.note || "transaction"}`}
-                            onClick={() => setSelectedTransaction(tx)}
-                          >
-                            <span aria-hidden="true">↗</span>
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          </td>
+                          <td>
+                            <span className="bb-acct-text">
+                              {getAccountSummary(
+                                tx.from_account,
+                                tx.to_account,
+                              )}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="bb-date-cell">
+                              <strong>
+                                {tx.transactionDate || tx.createdDate || "—"}
+                              </strong>
+                              <span>{tx.createdTime || ""}</span>
+                            </div>
+                          </td>
+                          <td className="text-end">{renderAmount(tx)}</td>
+                          <td className="text-center">
+                            <button
+                              type="button"
+                              className="bb-action-btn"
+                              title="View transaction details"
+                              aria-label={`View details for ${tx.note || "transaction"}`}
+                              onClick={() => setSelectedTransaction(tx)}
+                            >
+                              <span aria-hidden="true">↗</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
 
             {/* Compact transaction cards on phones */}
             <div className="bb-mobile-transactions d-md-none">
-              {items.length === 0 ? (
+              {paginatedItems.length === 0 ? (
                 <div className="bb-empty-state">
                   <span className="bb-empty-icon">⌕</span>
                   <strong>No transactions found</strong>
                   <span>Try changing your search or filters.</span>
-                  <button type="button" className="bb-clear-filters" onClick={clearFilters}>
+                  <button
+                    type="button"
+                    className="bb-clear-filters"
+                    onClick={clearFilters}
+                  >
                     Clear all filters
                   </button>
                 </div>
-              ) : items.map((tx) => {
-                const category = CAT_META[tx.category] || CAT_META.OTHER;
-                return (
-                  <article className="bb-mobile-tx-card" key={tx.id}>
-                    <div className="bb-mobile-tx-main">
-                      <span className="bb-transaction-category-icon" style={{ "--category-color": category.color }}>
-                        {category.label.charAt(0)}
-                      </span>
-                      <div className="bb-transaction-copy">
-                        <strong>{tx.note || category.label}</strong>
-                        <span>{category.label} · {getTypeLabel(tx.transaction_type)}</span>
+              ) : (
+                paginatedItems.map((tx) => {
+                  const category = CAT_META[tx.category] || CAT_META.OTHER;
+                  return (
+                    <article className="bb-mobile-tx-card" key={tx.id}>
+                      <div className="bb-mobile-tx-main">
+                        <span
+                          className="bb-transaction-category-icon"
+                          style={{ "--category-color": category.color }}
+                        >
+                          {category.label.charAt(0)}
+                        </span>
+                        <div className="bb-transaction-copy">
+                          <strong>{tx.note || category.label}</strong>
+                          <span>
+                            {category.label} ·{" "}
+                            {getTypeLabel(tx.transaction_type)}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          className="bb-action-btn"
+                          onClick={() => setSelectedTransaction(tx)}
+                          aria-label={`View details for ${tx.note || "transaction"}`}
+                        >
+                          ↗
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        className="bb-action-btn"
-                        onClick={() => setSelectedTransaction(tx)}
-                        aria-label={`View details for ${tx.note || "transaction"}`}
-                      >
-                        ↗
-                      </button>
-                    </div>
-                    <div className="bb-mobile-tx-bottom">
-                      <span>{getAccountSummary(tx.from_account, tx.to_account)}</span>
-                      {renderAmount(tx)}
-                    </div>
-                    <div className="bb-mobile-tx-date">
-                      {tx.transactionDate || tx.createdDate || "—"} {tx.createdTime ? `· ${tx.createdTime}` : ""}
-                    </div>
-                  </article>
-                );
-              })}
+                      <div className="bb-mobile-tx-bottom">
+                        <span>
+                          {getAccountSummary(tx.from_account, tx.to_account)}
+                        </span>
+                        {renderAmount(tx)}
+                      </div>
+                      <div className="bb-mobile-tx-date">
+                        {tx.transactionDate || tx.createdDate || "—"}{" "}
+                        {tx.createdTime ? `· ${tx.createdTime}` : ""}
+                      </div>
+                    </article>
+                  );
+                })
+              )}
             </div>
+
+            {/* Pagination Controls */}
+            {items.length > 0 && (
+              <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-3 mt-3 border-top border-secondary border-opacity-25">
+                <span className="fr-caption">
+                  Showing {startIdx + 1}–
+                  {Math.min(startIdx + TX_PAGE_SIZE, items.length)} of{" "}
+                  {items.length}
+                </span>
+
+                <div className="d-flex flex-wrap align-items-center gap-1">
+                  <button
+                    type="button"
+                    className="bb-pill"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    Prev
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(
+                    (pageNum) => (
+                      <button
+                        key={pageNum}
+                        type="button"
+                        className={`bb-pill ${page === pageNum ? "active" : ""}`}
+                        onClick={() => setPage(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    ),
+                  )}
+
+                  <button
+                    type="button"
+                    className="bb-pill"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -352,36 +486,56 @@ const TransactionList = ({ transactions = [] }) => {
                 <div>
                   <span className="bb-panel-eyebrow">SPENDING INSIGHT</span>
                   <h2 className="bb-panel-title mb-0">Expense Breakdown</h2>
-                  <p className="bb-expense-caption mb-0">See where your money goes</p>
+                  <p className="bb-expense-caption mb-0">
+                    See where your money goes
+                  </p>
                 </div>
                 <span className="bb-kpi-chip bb-kpi-chip-expense">OUTFLOW</span>
               </div>
 
               {breakdown.entries.length === 0 ? (
-                <div className="bb-empty-compact">No expense data available yet.</div>
+                <div className="bb-empty-compact">
+                  No expense data available yet.
+                </div>
               ) : (
                 <>
                   <div className="bb-expense-summary">
                     <div>
-                      <span className="bb-expense-summary-label">TOTAL SPENT</span>
+                      <span className="bb-expense-summary-label">
+                        TOTAL SPENT
+                      </span>
                       <strong>{formatMMK(breakdown.total)}</strong>
                     </div>
-                    <span className="bb-expense-summary-icon" aria-hidden="true">↘</span>
+                    <span
+                      className="bb-expense-summary-icon"
+                      aria-hidden="true"
+                    >
+                      ↘
+                    </span>
                   </div>
 
                   <div className="bb-breakdown-visual">
-                    <div className="bb-bd-ring-wrap" style={{ background: breakdown.conicGradient }}>
+                    <div
+                      className="bb-bd-ring-wrap"
+                      style={{ background: breakdown.conicGradient }}
+                    >
                       <div className="bb-bd-ring-hole">
-                        <strong style={{ color: activeEntry?.color || "#fbbf24" }}>
+                        <strong
+                          style={{ color: activeEntry?.color || "#fbbf24" }}
+                        >
                           {activeEntry?.percent ?? 0}%
                         </strong>
                         <span>{activeEntry?.label || "Outflow"}</span>
                       </div>
                     </div>
                     <div className="bb-breakdown-focus">
-                      <span className="bb-breakdown-focus-label">SELECTED CATEGORY</span>
+                      <span className="bb-breakdown-focus-label">
+                        SELECTED CATEGORY
+                      </span>
                       <strong>{activeEntry?.label || "All expenses"}</strong>
-                      <span>{formatMMK(activeEntry?.amount ?? breakdown.total)}</span>
+                      <span>
+                        {formatMMK(activeEntry?.amount ?? breakdown.total)}
+                      </span>
                     </div>
                   </div>
 
@@ -399,7 +553,12 @@ const TransactionList = ({ transactions = [] }) => {
                         aria-pressed={activeEntry?.category === entry.category}
                       >
                         <span className="bb-breakdown-name">
-                          <i style={{ backgroundColor: entry.color, boxShadow: `0 0 10px ${entry.color}66` }} />
+                          <i
+                            style={{
+                              backgroundColor: entry.color,
+                              boxShadow: `0 0 10px ${entry.color}66`,
+                            }}
+                          />
                           <span>{entry.label}</span>
                         </span>
                         <span className="bb-breakdown-value">
@@ -407,7 +566,13 @@ const TransactionList = ({ transactions = [] }) => {
                           <em>{entry.percent}%</em>
                         </span>
                         <span className="bb-bd-track">
-                          <span className="bb-bd-fill" style={{ width: `${entry.percent}%`, backgroundColor: entry.color }} />
+                          <span
+                            className="bb-bd-fill"
+                            style={{
+                              width: `${entry.percent}%`,
+                              backgroundColor: entry.color,
+                            }}
+                          />
                         </span>
                       </button>
                     ))}
@@ -422,21 +587,33 @@ const TransactionList = ({ transactions = [] }) => {
                   <span className="bb-panel-eyebrow">RECURRING PAYMENTS</span>
                   <h2 className="bb-panel-title mb-0">Subscriptions</h2>
                 </div>
-                <span className="bb-total-records">{subscriptions.length} records</span>
+                <span className="bb-total-records">
+                  {subscriptions.length} records
+                </span>
               </div>
 
               {subscriptions.length === 0 ? (
-                <div className="bb-empty-compact">No subscriptions recorded yet.</div>
+                <div className="bb-empty-compact">
+                  No subscriptions recorded yet.
+                </div>
               ) : (
                 <div className="bb-sub-list">
                   {subscriptions.map((sub) => (
                     <div className="bb-sub-card" key={sub.id}>
                       <span className="bb-sub-icon">↻</span>
                       <div className="bb-sub-copy">
-                        <strong>{sub.note || CAT_META[sub.category]?.label || "Subscription"}</strong>
-                        <span>{sub.from_account?.name || "Account not specified"}</span>
+                        <strong>
+                          {sub.note ||
+                            CAT_META[sub.category]?.label ||
+                            "Subscription"}
+                        </strong>
+                        <span>
+                          {sub.from_account?.name || "Account not specified"}
+                        </span>
                       </div>
-                      <strong className="bb-amt-out">−{formatMMK(sub.amount)}</strong>
+                      <strong className="bb-amt-out">
+                        −{formatMMK(sub.amount)}
+                      </strong>
                     </div>
                   ))}
                 </div>
@@ -446,13 +623,13 @@ const TransactionList = ({ transactions = [] }) => {
         </aside>
       </section>
 
-      {/* Local UI-only details dialog. Replace actions with API handlers later. */}
       {selectedTransaction && (
         <div
           className="bb-modal-backdrop"
           role="presentation"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setSelectedTransaction(null);
+            if (event.target === event.currentTarget)
+              setSelectedTransaction(null);
           }}
         >
           <section
@@ -464,7 +641,9 @@ const TransactionList = ({ transactions = [] }) => {
             <div className="bb-detail-modal-head">
               <div>
                 <span className="bb-panel-eyebrow">TRANSACTION DETAILS</span>
-                <h2 id="bb-detail-title" className="bb-panel-title mb-0">Record overview</h2>
+                <h2 id="bb-detail-title" className="bb-panel-title mb-0">
+                  Record overview
+                </h2>
               </div>
               <button
                 type="button"
@@ -482,12 +661,43 @@ const TransactionList = ({ transactions = [] }) => {
             </div>
 
             <dl className="bb-detail-list">
-              <div><dt>Description</dt><dd>{selectedTransaction.note || "—"}</dd></div>
-              <div><dt>Category</dt><dd>{CAT_META[selectedTransaction.category]?.label || selectedTransaction.category || "—"}</dd></div>
-              <div><dt>Account</dt><dd>{getAccountSummary(selectedTransaction.from_account, selectedTransaction.to_account)}</dd></div>
-              <div><dt>Date</dt><dd>{selectedTransaction.transactionDate || selectedTransaction.createdDate || "—"}</dd></div>
-              <div><dt>Time</dt><dd>{selectedTransaction.createdTime || "—"}</dd></div>
-              <div><dt>Record ID</dt><dd>#{selectedTransaction.id}</dd></div>
+              <div>
+                <dt>Description</dt>
+                <dd>{selectedTransaction.note || "—"}</dd>
+              </div>
+              <div>
+                <dt>Category</dt>
+                <dd>
+                  {CAT_META[selectedTransaction.category]?.label ||
+                    selectedTransaction.category ||
+                    "—"}
+                </dd>
+              </div>
+              <div>
+                <dt>Account</dt>
+                <dd>
+                  {getAccountSummary(
+                    selectedTransaction.from_account,
+                    selectedTransaction.to_account,
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>Date</dt>
+                <dd>
+                  {selectedTransaction.transactionDate ||
+                    selectedTransaction.createdDate ||
+                    "—"}
+                </dd>
+              </div>
+              <div>
+                <dt>Time</dt>
+                <dd>{selectedTransaction.createdTime || "—"}</dd>
+              </div>
+              <div>
+                <dt>Record ID</dt>
+                <dd>#{selectedTransaction.id}</dd>
+              </div>
             </dl>
 
             <div className="bb-detail-actions">
@@ -502,7 +712,6 @@ const TransactionList = ({ transactions = [] }) => {
                 type="button"
                 className="btn-gold"
                 onClick={() => {
-                  // Future: connect this button to the transaction edit route/API.
                   setSelectedTransaction(null);
                 }}
               >

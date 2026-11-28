@@ -13,9 +13,6 @@ const DashboardPage=()=>{
                     <h2 className="dashboard-title-name">Welcome back {displayName}!</h2>
                     {/* Income, Expense & Budget Cards */}
                     <FirstRow></FirstRow>
-                </div>
-                <div className="row">
-                    {/* Charts & Graph */}
                     <SecondRow></SecondRow>
                 </div>
             </div>

@@ -34,7 +34,6 @@ const getErrorText = (error) => {
   return error ? JSON.stringify(error) : "Unknown request error";
 };
 
-// The backend serializes transactionDate as yyyy-MM-dd. Parse it as a local
 // date so dates close to midnight are not shifted by a UTC conversion.
 const parseLocalDate = (value) => {
   if (!value) return null;
@@ -96,7 +95,6 @@ const buildMonthlyCashflow = (transactions, count, today) => {
     ) {
       month.outflow += amount;
     }
-    // TRANSFER entries are intentionally excluded from income and expenses.
   });
 
   return months;
@@ -169,8 +167,6 @@ const SecondRow = () => {
   const accountLoading = useSelector((state) => state.accounts.loading);
   const accountError = useSelector((state) => state.accounts.error);
 
-  // Transactions are loaded by FirstRow on the dashboard. This component loads
-  // the account list through the existing authenticated account service.
   useEffect(() => {
     dispatch(fetchAccounts());
   }, [dispatch]);
@@ -300,9 +296,10 @@ const SecondRow = () => {
     <div className="fr-wrap dashboard-content mt-3">
       <div className="container-fluid px-0">
         {errors.length > 0 && (
-          <div className="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 mb-3">
+          <div className="bb-pf-feedback bb-pf-feedback-error d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 mb-3">
             <span>
-              Dashboard data could not be fully refreshed. {getErrorText(errors[0])}
+              Dashboard data could not be fully refreshed.{" "}
+              {getErrorText(errors[0])}
             </span>
             <button
               type="button"
@@ -316,7 +313,7 @@ const SecondRow = () => {
         )}
 
         {hasMixedCurrencies && (
-          <div className="alert alert-info py-2 mb-3">
+          <div className="bb-pf-feedback bb-pf-feedback-error py-2 mb-3">
             Multiple account currencies were found. Account balances are shown
             separately by currency; transaction chart totals are shown as
             recorded because the transaction API does not include the linked
@@ -427,13 +424,11 @@ const SecondRow = () => {
                 </div>
 
                 <div className="mb-3">
-                  {Object.entries(dashboardData.balancesByCurrency).length > 0 ? (
+                  {Object.entries(dashboardData.balancesByCurrency).length >
+                  0 ? (
                     Object.entries(dashboardData.balancesByCurrency).map(
                       ([currency, amount]) => (
-                        <div
-                          key={currency}
-                          className="fr-value fr-value-gold"
-                        >
+                        <div key={currency} className="fr-value fr-value-gold">
                           {formatAmount(amount)}{" "}
                           <span className="fs-6 fw-semibold">{currency}</span>
                         </div>
@@ -732,7 +727,9 @@ const SecondRow = () => {
         </div>
 
         {dataLoading && (
-          <div className="fr-subtag text-end mt-2">Updating dashboard data...</div>
+          <div className="fr-subtag text-end mt-2">
+            Updating dashboard data...
+          </div>
         )}
       </div>
     </div>

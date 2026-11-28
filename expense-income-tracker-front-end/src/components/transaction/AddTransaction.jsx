@@ -1,14 +1,18 @@
-
 import React, { useState } from "react";
 
 const TYPES = [
   { value: "EXPENSE", label: "Expense", icon: "↗", color: "expense" },
   { value: "INCOME", label: "Income", icon: "↙", color: "income" },
   { value: "TRANSFER", label: "Transfer", icon: "⇄", color: "transfer" },
-  { value: "SUBSCRIPTION", label: "Subscription", icon: "◷", color: "subscription" }
+  {
+    value: "SUBSCRIPTION",
+    label: "Subscription",
+    icon: "◷",
+    color: "subscription",
+  },
 ];
 
-// Matches backend enum
+// backend categories
 const CATEGORIES = [
   { value: "FOOD", label: "Food" },
   { value: "GROCERIES", label: "Groceries" },
@@ -17,7 +21,7 @@ const CATEGORIES = [
   { value: "HOUSING", label: "Housing" },
   { value: "BILLPAYMENT", label: "Bill Payment" },
   { value: "ENTERTAINMENT", label: "Entertainment" },
-  { value: "OTHER", label: "Other" }
+  { value: "OTHER", label: "Other" },
 ];
 
 const INITIAL = {
@@ -26,7 +30,7 @@ const INITIAL = {
   from_account_id: "",
   to_account_id: "",
   amount: "",
-  note: ""
+  note: "",
 };
 
 const AddTransaction = ({
@@ -36,7 +40,7 @@ const AddTransaction = ({
   accounts = [],
   accountLoading = false,
   accountError = null,
-  transactionLoading = false
+  transactionLoading = false,
 }) => {
   const [form, setForm] = useState(INITIAL);
 
@@ -48,11 +52,10 @@ const AddTransaction = ({
     form.transaction_type === "SUBSCRIPTION";
 
   const showTo =
-    form.transaction_type === "INCOME" ||
-    form.transaction_type === "TRANSFER";
+    form.transaction_type === "INCOME" || form.transaction_type === "TRANSFER";
 
   const selectedType = TYPES.find(
-    (type) => type.value === form.transaction_type
+    (type) => type.value === form.transaction_type,
   );
 
   const handleChange = (event) => {
@@ -60,7 +63,7 @@ const AddTransaction = ({
 
     setForm((previous) => ({
       ...previous,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -76,15 +79,16 @@ const AddTransaction = ({
         typeValue === "INCOME"
           ? previous.to_account_id || String(accounts[0]?.id || "")
           : typeValue === "TRANSFER"
-            ? previous.to_account_id || String(accounts[1]?.id || accounts[0]?.id || "")
-            : ""
+            ? previous.to_account_id ||
+              String(accounts[1]?.id || accounts[0]?.id || "")
+            : "",
     }));
   };
 
   const handleReset = () => {
     setForm({
       ...INITIAL,
-      from_account_id: String(accounts[0]?.id || "")
+      from_account_id: String(accounts[0]?.id || ""),
     });
   };
 
@@ -97,8 +101,13 @@ const AddTransaction = ({
       return;
     }
 
-    if ((showFrom && !form.from_account_id) || (showTo && !form.to_account_id)) return;
-    if (form.transaction_type === "TRANSFER" && form.from_account_id === form.to_account_id) return;
+    if ((showFrom && !form.from_account_id) || (showTo && !form.to_account_id))
+      return;
+    if (
+      form.transaction_type === "TRANSFER" &&
+      form.from_account_id === form.to_account_id
+    )
+      return;
 
     const record = {
       transaction_type: form.transaction_type,
@@ -107,7 +116,7 @@ const AddTransaction = ({
       to_account: showTo ? { id: Number(form.to_account_id) } : null,
       amount,
       note: form.note.trim(),
-      transactionDate: new Date().toLocaleDateString("en-CA")
+      transactionDate: new Date().toLocaleDateString("en-CA"),
     };
 
     onAddTransaction?.(record);
@@ -124,13 +133,9 @@ const AddTransaction = ({
           </div>
 
           <div className="bb-add-heading-copy">
-            <span className="bb-add-eyebrow">
-              TRANSACTION MANAGEMENT
-            </span>
+            <span className="bb-add-eyebrow">TRANSACTION MANAGEMENT</span>
 
-            <h5 className="bb-add-title">
-              Create New Transaction
-            </h5>
+            <h5 className="bb-add-title">Create New Transaction</h5>
 
             <p className="bb-add-subtitle">
               Add and organize your financial activity
@@ -149,8 +154,18 @@ const AddTransaction = ({
         </button>
       </div>
 
-      {accountError && <div className="alert alert-danger mx-4 mt-3">{typeof accountError === "string" ? accountError : "Unable to load accounts."}</div>}
-      {!accountLoading && accounts.length === 0 && <div className="alert alert-warning mx-4 mt-3">Create a financial account before adding a transaction.</div>}
+      {accountError && (
+        <div className="bb-pf-feedback bb-pf-feedback-error mx-4 mt-3">
+          {typeof accountError === "string"
+            ? accountError
+            : "Unable to load accounts."}
+        </div>
+      )}
+      {!accountLoading && accounts.length === 0 && (
+        <div className="bb-pf-feedback bb-pf-feedback-error mx-4 mt-3">
+          Create a financial account before adding a transaction.
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         {/* TRANSACTION TYPE */}
         <section className="bb-add-section">
@@ -165,8 +180,7 @@ const AddTransaction = ({
 
           <div className="bb-type-grid">
             {TYPES.map((type) => {
-              const isActive =
-                form.transaction_type === type.value;
+              const isActive = form.transaction_type === type.value;
 
               return (
                 <button
@@ -182,9 +196,7 @@ const AddTransaction = ({
                     {type.icon}
                   </span>
 
-                  <span className="bb-type-label">
-                    {type.label}
-                  </span>
+                  <span className="bb-type-label">{type.label}</span>
 
                   <span className="bb-type-check" aria-hidden="true">
                     ✓
@@ -248,14 +260,9 @@ const AddTransaction = ({
           <div className="row g-3">
             {/* CATEGORY */}
             <div className="col-12 col-sm-6">
-              <label
-                htmlFor="bb-transaction-category"
-                className="bb-add-label"
-              >
+              <label htmlFor="bb-transaction-category" className="bb-add-label">
                 <span>Category</span>
-                <span className="bb-label-required">
-                  REQUIRED
-                </span>
+                <span className="bb-label-required">REQUIRED</span>
               </label>
 
               <select
@@ -267,10 +274,7 @@ const AddTransaction = ({
                 required
               >
                 {CATEGORIES.map((category) => (
-                  <option
-                    key={category.value}
-                    value={category.value}
-                  >
+                  <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
                 ))}
@@ -280,14 +284,9 @@ const AddTransaction = ({
             {/* FROM ACCOUNT */}
             {showFrom && (
               <div className="col-12 col-sm-6">
-                <label
-                  htmlFor="bb-from-account"
-                  className="bb-add-label"
-                >
+                <label htmlFor="bb-from-account" className="bb-add-label">
                   <span>From Account</span>
-                  <span className="bb-label-required">
-                    REQUIRED
-                  </span>
+                  <span className="bb-label-required">REQUIRED</span>
                 </label>
 
                 <select
@@ -298,13 +297,12 @@ const AddTransaction = ({
                   className="form-select bb-select bb-add-field"
                   required
                 >
-                  <option value="">{accountLoading ? "Loading accounts..." : "Select account"}</option>
+                  <option value="">
+                    {accountLoading ? "Loading accounts..." : "Select account"}
+                  </option>
 
                   {accounts.map((account) => (
-                    <option
-                      key={account.id}
-                      value={account.id}
-                    >
+                    <option key={account.id} value={account.id}>
                       {account.accname}
                     </option>
                   ))}
@@ -315,14 +313,9 @@ const AddTransaction = ({
             {/* TO ACCOUNT */}
             {showTo && (
               <div className="col-12 col-sm-6">
-                <label
-                  htmlFor="bb-to-account"
-                  className="bb-add-label"
-                >
+                <label htmlFor="bb-to-account" className="bb-add-label">
                   <span>To Account</span>
-                  <span className="bb-label-required">
-                    REQUIRED
-                  </span>
+                  <span className="bb-label-required">REQUIRED</span>
                 </label>
 
                 <select
@@ -333,13 +326,12 @@ const AddTransaction = ({
                   className="form-select bb-select bb-add-field"
                   required
                 >
-                  <option value="">{accountLoading ? "Loading accounts..." : "Select account"}</option>
+                  <option value="">
+                    {accountLoading ? "Loading accounts..." : "Select account"}
+                  </option>
 
                   {accounts.map((account) => (
-                    <option
-                      key={account.id}
-                      value={account.id}
-                    >
+                    <option key={account.id} value={account.id}>
                       {account.accname}
                     </option>
                   ))}
@@ -349,14 +341,9 @@ const AddTransaction = ({
 
             {/* NOTE */}
             <div className="col-12">
-              <label
-                htmlFor="bb-transaction-note"
-                className="bb-add-label"
-              >
+              <label htmlFor="bb-transaction-note" className="bb-add-label">
                 <span>Note</span>
-                <span className="bb-label-optional">
-                  OPTIONAL
-                </span>
+                <span className="bb-label-optional">OPTIONAL</span>
               </label>
 
               <div className="bb-note-wrap">
@@ -385,9 +372,7 @@ const AddTransaction = ({
               ◆
             </span>
 
-            <span>
-              Your financial record will be saved securely.
-            </span>
+            <span>Your financial record will be saved securely.</span>
           </div>
 
           <div className="bb-add-actions">
@@ -403,9 +388,13 @@ const AddTransaction = ({
             <button
               type="submit"
               className="bb-submit-btn"
-              disabled={transactionLoading || accountLoading || accounts.length === 0}
+              disabled={
+                transactionLoading || accountLoading || accounts.length === 0
+              }
             >
-              <span>{transactionLoading ? "Saving..." : "Save Transaction"}</span>
+              <span>
+                {transactionLoading ? "Saving..." : "Save Transaction"}
+              </span>
               <span className="bb-submit-arrow" aria-hidden="true">
                 →
               </span>

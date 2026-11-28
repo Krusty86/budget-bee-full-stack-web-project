@@ -73,7 +73,7 @@ public class AuthController {
 		PasswordResetToken token = passwordResetTokenService.generateOtp(email);
 		if(token!=null)
 			return ResponseEntity.status(HttpStatus.OK)
-					.body(token);
+					.body(Map.of("msg", "OTP sent successfully"));
 		else
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
 					.body(Map.of("msg","Failed to Request OTP code."));

@@ -13,4 +13,5 @@ public class PasswordResetRequest {
 	private String email;
 	private String code;
 	private String newPwd;
+	private String oldPwd;
 }
